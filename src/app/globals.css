@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-destructive: var(--destructive); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); --color-gold: var(--gold); --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px); }
+
+:root { --background: #f7f2e8; --foreground: #24312b; --card: #fffdf8; --card-foreground: #24312b; --primary: #164c3b; --primary-foreground: #ffffff; --secondary: #c9a45c; --secondary-foreground: #24312b; --muted: #eee7da; --muted-foreground: #66716c; --destructive: #b83c43; --border: #ded5c5; --input: #cfc4b1; --ring: #c9a45c; --gold: #c9a45c; --radius: 0.75rem; }
+* { border-color: var(--border); }
+html { background: var(--background); }
+body { min-height: 100vh; background: radial-gradient(circle at top, rgb(201 164 92 / 15%), transparent 35%), var(--background); color: var(--foreground); font-family: "IBM Plex Sans Thai", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif; }
+button, input { font: inherit; }
+::selection { background: rgb(201 164 92 / 35%); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }

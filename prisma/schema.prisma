@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RoomStatus {
+  DRAFT
+  READY
+  DRAWN
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  rooms         Room[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(uuid()) @db.Uuid
+  accountId             String
+  providerId            String
+  userId                String    @db.Uuid
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Room {
+  id           String         @id @default(uuid()) @db.Uuid
+  organizerId  String         @db.Uuid
+  name         String
+  description  String?
+  eventDate    DateTime?
+  budget       Decimal?       @db.Decimal(10, 2)
+  currency     String         @default("THB") @db.VarChar(3)
+  status       RoomStatus     @default(DRAFT)
+  drawnAt      DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  archivedAt   DateTime?
+  organizer    User           @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  participants Participant[]
+  excludedPairs ExcludedPair[]
+  assignments  Assignment[]
+
+  @@index([organizerId, status])
+}
+
+model Participant {
+  id                    String               @id @default(uuid()) @db.Uuid
+  roomId                String               @db.Uuid
+  displayName           String
+  normalizedName        String
+  invitationTokenHash   String?              @db.VarChar(64)
+  invitationIssuedAt    DateTime?
+  invitationExpiresAt   DateTime?
+  joinedAt              DateTime?
+  revealedAt            DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  room                  Room                 @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  excludedAsA           ExcludedPair[]       @relation("ExcludedParticipantA")
+  excludedAsB           ExcludedPair[]       @relation("ExcludedParticipantB")
+  givenAssignment       Assignment?          @relation("AssignmentGiver")
+  receivedAssignment    Assignment?          @relation("AssignmentReceiver")
+  sessions              ParticipantSession[]
+
+  @@unique([roomId, normalizedName])
+  @@unique([roomId, id])
+  @@index([invitationTokenHash])
+}
+
+model ExcludedPair {
+  id             String      @id @default(uuid()) @db.Uuid
+  roomId         String      @db.Uuid
+  participantAId String      @db.Uuid
+  participantBId String      @db.Uuid
+  createdAt      DateTime    @default(now())
+  room           Room        @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  participantA   Participant @relation("ExcludedParticipantA", fields: [roomId, participantAId], references: [roomId, id], onDelete: Cascade)
+  participantB   Participant @relation("ExcludedParticipantB", fields: [roomId, participantBId], references: [roomId, id], onDelete: Cascade)
+
+  @@unique([roomId, participantAId, participantBId])
+  @@index([roomId])
+}
+
+model Assignment {
+  id         String      @id @default(uuid()) @db.Uuid
+  roomId     String      @db.Uuid
+  giverId    String      @unique @db.Uuid
+  receiverId String      @unique @db.Uuid
+  createdAt  DateTime    @default(now())
+  room       Room        @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  giver      Participant @relation("AssignmentGiver", fields: [roomId, giverId], references: [roomId, id], onDelete: Restrict)
+  receiver   Participant @relation("AssignmentReceiver", fields: [roomId, receiverId], references: [roomId, id], onDelete: Restrict)
+
+  @@unique([roomId, giverId])
+  @@unique([roomId, receiverId])
+  @@index([roomId])
+}
+
+model ParticipantSession {
+  id            String      @id @default(uuid()) @db.Uuid
+  participantId String      @db.Uuid
+  tokenHash     String      @unique @db.VarChar(64)
+  createdAt     DateTime    @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+  @@index([expiresAt])
+}
