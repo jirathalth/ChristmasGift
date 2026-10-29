@@ -67,4 +67,6 @@ Do not run `prisma migrate dev` in production.
 
 ## Delivery status
 
-Phase 1 provides the project foundation, authentication, complete initial schema/migration, security headers, design tokens, public landing page, auth screens, and protected dashboard shell. Room/participant/exclusion CRUD begins in Phase 2.
+Phase 1 provides the project foundation, authentication, complete initial schema/migration, security headers, design tokens, public landing page, and auth screens.
+
+Phase 2 provides organizer-owned room management, participant management, bidirectional exclusion pairs, deterministic perfect-matching feasibility validation, protected APIs, and the responsive Thai organizer interface. It does not issue invitations or persist draw assignments.
