@@ -44,16 +44,16 @@ npm run test:e2e
 - Composite foreign keys prevent cross-room exclusions and assignments.
 - SQL checks enforce canonical exclusion ordering, no self-exclusions, and no self-assignments.
 - Assignment relations use restrictive deletes so a completed draw cannot be cascaded away. Pre-draw participant deletion may cascade only its exclusions and participant sessions.
-- The organizer must be added explicitly as a participant in Phase 2.
-- `READY` never replaces server-side validation; draw validation and row locking arrive in Phase 4.
+- The organizer must be added explicitly as a participant.
+- `READY` never replaces server-side validation; every draw revalidates under a database row lock.
 
 ## Security baseline
 
 - Better Auth uses HttpOnly session cookies and Secure cookies in production.
 - Global responses set `Referrer-Policy: no-referrer`, deny framing, and disable unnecessary browser permissions.
-- Sensitive participant routes will additionally use `Cache-Control: private, no-store` when added.
+- Sensitive participant routes and the invitation page use `Cache-Control: private, no-store`.
 - Invitation possession is bearer authorization; links can be forwarded and do not prove identity.
-- Raw invitation/session tokens must never be stored or logged. Phase 3 stores SHA-256 hashes only.
+- Raw invitation/session tokens are never stored or logged; only SHA-256 hashes are persisted.
 
 ## Deploy to Vercel
 
@@ -72,3 +72,7 @@ Phase 1 provides the project foundation, authentication, complete initial schema
 Phase 2 provides organizer-owned room management, participant management, bidirectional exclusion pairs, deterministic perfect-matching feasibility validation, protected APIs, and the responsive Thai organizer interface. It does not issue invitations or persist draw assignments.
 
 Phase 3 provides randomized transactional drawing, private hash-only invitation and participant sessions, fragment-based invitation links, participant reveal, organizer progress without assignment mappings, and LINE sharing. Draw results are immutable and remain server-only.
+
+The original Phase 4 draw-engine requirements are complete: randomized constrained perfect matching, stale-readiness validation, room locking, serializable atomic persistence, idempotency, and concurrency protection.
+
+Phase 5 provides the mobile participant waiting, reveal, stable result, and friendly link-state screens plus invited/visited/revealed organizer progress. Reveal motion respects reduced-motion preferences and recipient mappings remain private.

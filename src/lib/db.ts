@@ -9,7 +9,13 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is required");
 }
 
-const adapter = new PrismaPg({ connectionString });
+const databaseUrl = new URL(connectionString);
+
+if (["prefer", "require", "verify-ca"].includes(databaseUrl.searchParams.get("sslmode") ?? "")) {
+  databaseUrl.searchParams.set("sslmode", "verify-full");
+}
+
+const adapter = new PrismaPg({ connectionString: databaseUrl.toString() });
 
 export const db = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
