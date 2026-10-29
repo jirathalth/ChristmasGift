@@ -55,7 +55,7 @@ export async function getRoomDetail(roomId: string, organizerId: string) {
   const room = await db.room.findUnique({
     where: { id: roomId },
     include: {
-      participants: { orderBy: { createdAt: "asc" }, select: { id: true, displayName: true, createdAt: true, updatedAt: true } },
+      participants: { orderBy: { createdAt: "asc" }, select: { id: true, displayName: true, invitationIssuedAt: true, invitationExpiresAt: true, joinedAt: true, revealedAt: true, createdAt: true, updatedAt: true } },
       excludedPairs: { orderBy: { createdAt: "asc" }, include: { participantA: { select: { displayName: true } }, participantB: { select: { displayName: true } } } }
     }
   });
@@ -63,7 +63,7 @@ export async function getRoomDetail(roomId: string, organizerId: string) {
   const feasibility = validateDrawFeasibility(room.participants.map((participant) => participant.id), room.excludedPairs);
   return {
     ...serializeRoom(room),
-    participants: room.participants.map((participant) => ({ ...participant, createdAt: participant.createdAt.toISOString(), updatedAt: participant.updatedAt.toISOString() })),
+    participants: room.participants.map((participant) => ({ ...participant, invitationIssuedAt: participant.invitationIssuedAt?.toISOString() ?? null, invitationExpiresAt: participant.invitationExpiresAt?.toISOString() ?? null, joinedAt: participant.joinedAt?.toISOString() ?? null, revealedAt: participant.revealedAt?.toISOString() ?? null, createdAt: participant.createdAt.toISOString(), updatedAt: participant.updatedAt.toISOString() })),
     excludedPairs: room.excludedPairs.map((pair) => ({ id: pair.id, participantAId: pair.participantAId, participantBId: pair.participantBId, participantAName: pair.participantA.displayName, participantBName: pair.participantB.displayName, createdAt: pair.createdAt.toISOString() })),
     feasibility
   };

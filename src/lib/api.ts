@@ -7,12 +7,14 @@ export class ApiError extends Error {
 }
 
 export function ok<T>(data: T, status = 200) { return Response.json({ success: true, data } satisfies ApiEnvelope<T>, { status }); }
+export function privateOk<T>(data: T, status = 200, headers?: HeadersInit) { return Response.json({ success: true, data } satisfies ApiEnvelope<T>, { status, headers: { "Cache-Control": "private, no-store, max-age=0", Pragma: "no-cache", ...headers } }); }
 
 export function fail(error: unknown) {
-  if (error instanceof ApiError) return Response.json({ success: false, error: { code: error.code, message: error.message } }, { status: error.status });
-  if (error instanceof z.ZodError) return Response.json({ success: false, error: { code: "VALIDATION_ERROR", message: error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง" } }, { status: 400 });
-  console.error("Unhandled API error", error instanceof Error ? { name: error.name, message: error.message } : { type: typeof error });
-  return Response.json({ success: false, error: { code: "INTERNAL_ERROR", message: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง" } }, { status: 500 });
+  const headers = { "Cache-Control": "private, no-store, max-age=0" };
+  if (error instanceof ApiError) return Response.json({ success: false, error: { code: error.code, message: error.message } }, { status: error.status, headers });
+  if (error instanceof z.ZodError) return Response.json({ success: false, error: { code: "VALIDATION_ERROR", message: error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง" } }, { status: 400, headers });
+  console.error("Unhandled API error", error instanceof Error ? { name: error.name } : { type: typeof error });
+  return Response.json({ success: false, error: { code: "INTERNAL_ERROR", message: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง" } }, { status: 500, headers });
 }
 
 export async function parseJson(request: Request) {

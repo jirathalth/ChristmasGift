@@ -70,3 +70,5 @@ Do not run `prisma migrate dev` in production.
 Phase 1 provides the project foundation, authentication, complete initial schema/migration, security headers, design tokens, public landing page, and auth screens.
 
 Phase 2 provides organizer-owned room management, participant management, bidirectional exclusion pairs, deterministic perfect-matching feasibility validation, protected APIs, and the responsive Thai organizer interface. It does not issue invitations or persist draw assignments.
+
+Phase 3 provides randomized transactional drawing, private hash-only invitation and participant sessions, fragment-based invitation links, participant reveal, organizer progress without assignment mappings, and LINE sharing. Draw results are immutable and remain server-only.

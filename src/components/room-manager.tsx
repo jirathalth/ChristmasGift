@@ -7,8 +7,9 @@ import { ArrowLeft, CalendarDays, CheckCircle2, Gift, LoaderCircle, Pencil, Plus
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DrawManager } from "@/components/draw-manager";
 
-type Participant = { id: string; displayName: string };
+type Participant = { id: string; displayName: string; invitationIssuedAt: string | null; joinedAt: string | null; revealedAt: string | null };
 type ExcludedPair = { id: string; participantAId: string; participantBId: string; participantAName: string; participantBName: string };
 type Feasibility = { feasible: boolean; code: string; message: string };
 type RoomDetail = { id: string; name: string; description: string | null; eventDate: string | null; budget: string | null; currency: string; status: string; participants: Participant[]; excludedPairs: ExcludedPair[]; feasibility: Feasibility };
@@ -86,6 +87,7 @@ export function RoomManager({ room }: { room: RoomDetail }) {
         </div>
         <aside className="space-y-6 lg:sticky lg:top-6"><Card className={room.feasibility.feasible ? "border-primary/40" : "border-destructive/30"}><CardHeader><CardTitle className="flex items-center gap-2">{room.feasibility.feasible ? <CheckCircle2 className="size-5 text-primary" /> : <XCircle className="size-5 text-destructive" />}ความพร้อมจับฉลาก</CardTitle><CardDescription>{room.feasibility.message}</CardDescription></CardHeader><CardContent className="space-y-3"><div className="grid grid-cols-2 gap-3 text-center"><div className="rounded-xl bg-muted p-3"><p className="text-2xl font-black">{room.participants.length}</p><p className="text-xs text-muted-foreground">ผู้เข้าร่วม</p></div><div className="rounded-xl bg-muted p-3"><p className="text-2xl font-black">{room.excludedPairs.length}</p><p className="text-xs text-muted-foreground">คู่ยกเว้น</p></div></div>{editable && <Button className="w-full" variant={room.feasibility.feasible ? "default" : "outline"} onClick={validateDraw} disabled={pending === "validate"}>{pending === "validate" && <LoaderCircle className="size-4 animate-spin" />}ตรวจสอบความพร้อม</Button>}<p className="text-xs leading-5 text-muted-foreground">ขั้นตอนนี้ตรวจสอบความเป็นไปได้เท่านั้น ยังไม่มีการจับฉลากหรือบันทึกผล</p></CardContent></Card>
           {room.status === "COMPLETED" && <Card><CardHeader><CardTitle>เก็บกิจกรรม</CardTitle><CardDescription>เมื่อเก็บถาวรแล้ว กิจกรรมจะเป็นแบบอ่านอย่างเดียว</CardDescription></CardHeader><CardContent><Button variant="outline" className="w-full" onClick={() => request("archive", `/api/rooms/${room.id}/archive`, "POST")} disabled={pending === "archive"}>เก็บถาวร</Button></CardContent></Card>}
+          <DrawManager roomId={room.id} status={room.status} participants={room.participants} />
         </aside>
       </div>
     </main>
