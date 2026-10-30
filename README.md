@@ -37,6 +37,8 @@ npm run db:deploy
 npm run test:e2e
 ```
 
+Database E2E requires an isolated Neon development branch plus explicit `E2E_ALLOW_DATABASE_MUTATION=true` and `E2E_EXPECTED_DATABASE_HOST`. The suite refuses to mutate any other host and cleans only users whose generated email uses the `codex-e2e-…@example.test` marker.
+
 ## Database decisions
 
 - Better Auth owns the UUID-based `user`, `session`, `account`, and `verification` models.
@@ -76,3 +78,5 @@ Phase 3 provides randomized transactional drawing, private hash-only invitation 
 The original Phase 4 draw-engine requirements are complete: randomized constrained perfect matching, stale-readiness validation, room locking, serializable atomic persistence, idempotency, and concurrency protection.
 
 Phase 5 provides the mobile participant waiting, reveal, stable result, and friendly link-state screens plus invited/visited/revealed organizer progress. Reveal motion respects reduced-motion preferences and recipient mappings remain private.
+
+Phase 6 adds distributed Upstash rate limiting, guarded Neon E2E, automated WCAG checks, hardened private caching/security headers, and the production deployment runbook in [`docs/PRODUCTION.md`](docs/PRODUCTION.md).

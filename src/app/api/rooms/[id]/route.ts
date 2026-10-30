@@ -1,4 +1,4 @@
-import { assertSameOrigin, fail, ok, parseJson } from "@/lib/api";
+import { assertSameOrigin, fail, ok, parseJson, privateOk } from "@/lib/api";
 import { requireOrganizer } from "@/lib/organizer";
 import { getRoomDetail, updateRoom } from "@/lib/rooms/service";
 import { roomIdSchema, roomInputSchema } from "@/lib/rooms/validation";
@@ -6,7 +6,7 @@ import { roomIdSchema, roomInputSchema } from "@/lib/rooms/validation";
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, context: Context) {
-  try { const user = await requireOrganizer(request); const { id } = await context.params; return ok(await getRoomDetail(roomIdSchema.parse(id), user.id)); } catch (error) { return fail(error); }
+  try { const user = await requireOrganizer(request); const { id } = await context.params; return privateOk(await getRoomDetail(roomIdSchema.parse(id), user.id)); } catch (error) { return fail(error); }
 }
 
 export async function PATCH(request: Request, context: Context) {

@@ -8,7 +8,7 @@ const inputSchema = z.object({ token: z.string().min(43).max(128).regex(/^[A-Za-
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
-    assertRateLimit("invitation-redeem", request, 20, 60_000);
+    await assertRateLimit("invitation-redeem", request, 20, 60_000);
     const { token } = inputSchema.parse(await parseJson(request));
     const result = await redeemInvitation(token);
     return privateOk(result.event, 200, { "Set-Cookie": participantCookie(result.sessionToken, result.expiresAt) });
